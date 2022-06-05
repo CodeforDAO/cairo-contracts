@@ -1,0 +1,6 @@
+wheel
+cairo-lang
+cairo-nile
+pytest-cairo
+tox
+git+https://github.com/OpenZeppelin/cairo-contracts.git
