@@ -39,8 +39,12 @@ func constructor{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
-    }(owner: felt):
-    ERC20_initializer('MyToken', 'MTK', 18)
+    }(
+        name: felt,
+        symbol: felt,
+        owner: felt
+    ):
+    ERC20_initializer(name, symbol, 18)
     Ownable_initializer(owner)
     return ()
 end

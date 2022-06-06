@@ -35,13 +35,45 @@ from openzeppelin.access.ownable import (
     Ownable_only_owner,
 )
 
+#
+# Structs
+#
+struct ContractType:
+    member governor: felt
+    member treasury: felt
+    member share_token: felt
+    member share_governor: felt
+end
+
+#
+# Storage
+#
+@storage_var
+func contract_uri() -> (uri: felt):
+end
+
+@storage_var
+func investor(token_id: Uint256) -> (res: felt):
+end
+
+@storage_var
+func contracts_addresses(contract_type: ContractType) -> (addr: felt):
+end
+
+#
+# Initializer
+#
 @constructor
 func constructor{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
-    }(owner: felt):
-    ERC721_initializer('MyToken', 'MTK')
+    }(
+        name: felt,
+        symbol: felt,
+        owner: felt
+    ):
+    ERC721_initializer(name, symbol)
     Ownable_initializer(owner)
     return ()
 end
@@ -131,6 +163,26 @@ func tokenURI{
 end
 
 @view
+func contractURI{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }() -> (owner: felt):
+    let (uri) = contract_uri()
+    return (uri)
+end
+
+@view
+func isInvestor{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(token_id: Uint256) -> (res: felt):
+    let (res) = investor.read(token_id)
+    return (res)
+end
+
+@view
 func paused{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
@@ -143,6 +195,36 @@ end
 #
 # Externals
 #
+
+@external
+func setContractURI{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(uri: felt):
+    Ownable_only_owner()
+    contract_uri.write(uri)
+    return ()
+end
+
+@external
+func setupGovernor{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(
+        governor_addr: felt,
+        treasury_addr: felt,
+        share_token_addr: felt,
+        share_governor_addr: felt
+    ):
+    Ownable_only_owner()
+    contracts_addresses.write(ContractType.treasury, treasury_addr)
+    contracts_addresses.write(ContractType.governor, governor_addr)
+    contracts_addresses.write(ContractType.share_token, share_token_addr)
+    contracts_addresses.write(ContractType.share_governor, share_governor_addr)
+    return ()
+end
 
 @external
 func approve{
