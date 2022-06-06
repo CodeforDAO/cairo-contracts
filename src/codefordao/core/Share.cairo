@@ -34,6 +34,13 @@ from openzeppelin.access.ownable import (
     Ownable_only_owner,
 )
 
+# 
+# @title Share
+# @notice The share contract determines the issuance and suspension of share tokens,
+# as well as the administrator role.
+# Basically it is a pre-defined contract for erc20 token but support ERC20Votes.
+# 
+
 @constructor
 func constructor{
         syscall_ptr: felt*,
