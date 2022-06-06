@@ -30,18 +30,18 @@ It introduces some basic features to DAO, including vault contracts for self-ser
 
 Read the full documents in this [Solidity Repo](https://github.com/CodeforDAO/contracts) of CodeforDAO contracts
 
-### Set up the project
+## Set up the project
 
 Before creating virtual environment, please **make sure** to install Python `3.7.12` using the Python version management tool and activate that version.
 
-#### Create a Python virtual environment
+### Create a Python virtual environment
 
 ```bash
 python -m venv env
 source env/bin/activate
 ```
 
-#### Install the requirements
+### Install the requirements
 
 ```bash
 pip install -r requirements.txt
@@ -49,13 +49,13 @@ pip install -r requirements.txt
 
 **Notice**: this project use the latest version of OpenZeppelin contract for Cairo instead of the stable release of it.
 
-### Compile
+## Compile
 
 ```bash
 nile compile --directory src
 ```
 
-### Running tests
+## Running tests
 
 Running spec tests where you can find them in `./test` folder
 
@@ -63,6 +63,14 @@ Running spec tests where you can find them in `./test` folder
 $ pytest tests
 ```
 
-### License
+## Use this module in your project
+
+**Note:** these smart contracts are not designed to be library contracts(except `Module.cairo`), and you can fork these contracts locally to modify them yourself, rather than importing them directly by a git link.
+
+```bash
+pip install git+https://github.com/CodeforDAO/cairo-contracts.git
+```
+
+## License
 
 This project is released under the [MIT](LICENSE).
