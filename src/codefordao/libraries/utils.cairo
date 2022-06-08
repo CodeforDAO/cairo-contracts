@@ -11,33 +11,33 @@ struct ArrayInfo:
 end
 
 @storage_var
-func _array_key_index() -> (felt):
+func _array_key_index() -> (res: felt):
 end
 
 @storage_var
-func _arrays(key: ArrayInfo.key, index: felt) -> (res: felt):
+func _arrays(key: felt, index: felt) -> (res: felt):
 end
 
 @storage_var
-func _array_info(key: ArrayInfo.key) -> (slot: ArrayInfo):
+func _array_info(key: felt) -> (slot: ArrayInfo):
 end
 
-namespace Arrays:
+namespace Array:
     # Save array to storage with increasing key.
-    func push{
+    func save{
             syscall_ptr : felt*,
             pedersen_ptr : HashBuiltin*,
             range_check_ptr
         }(
             arr_len: felt, 
             arr: felt*
-        ) -> (key: ArrayInfo.key):
+        ) -> (key: felt):
         with_attr error_message("Arrays.push: invalid length of giving array"):
             assert arr_len = 0
         end
 
         let (k) = _array_key_index.read()
-        let info = ArrayInfo(key: k, len: arr_len)
+        let info = ArrayInfo(key=k, len=arr_len)
 
         _array_info.write(key=k, slot=info)
         _write_array(key=k, arr_index=0, arr_len=arr_len, arr=arr)
@@ -52,7 +52,7 @@ namespace Arrays:
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(
-        key: ArrayInfo.key,
+        key: felt,
         index: felt
     ) -> (res: felt):
         let (res) = _arrays.read(key=key, index=index)
@@ -63,7 +63,7 @@ namespace Arrays:
             syscall_ptr : felt*,
             pedersen_ptr : HashBuiltin*,
             range_check_ptr
-        }(key: ArrayInfo.key) -> (
+        }(key: felt) -> (
             arr_len: felt,
             arr: felt*
         ):
@@ -86,7 +86,7 @@ namespace Arrays:
             pedersen_ptr : HashBuiltin*,
             range_check_ptr
         }(
-            key: ArrayInfo.key,
+            key: felt,
             arr_index: felt,
             arr_len: felt,
             arr: felt*
@@ -106,7 +106,7 @@ namespace Arrays:
             pedersen_ptr : HashBuiltin*,
             range_check_ptr
         }(
-            key: ArrayInfo.key,
+            key: felt,
             arr_index: felt,
             arr_len: felt,
             arr: felt*

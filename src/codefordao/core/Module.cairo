@@ -60,16 +60,20 @@ func ModuleProposalCancelled(
 end
 
 #
-# Storage
+# Structs
 #
 
-struct Transaction:
-    member to : felt
+struct MicroProposal:
+    member target : felt
     member function_selector : felt
     member calldata_len : felt
-    member executed : felt
-    member num_confirmations : felt
+    member confirmations : felt
+    member status: felt
 end
+
+#
+# Storage
+#
 
 @storage_var
 func _name() -> (uri: felt):
