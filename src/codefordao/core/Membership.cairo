@@ -39,15 +39,11 @@ from openzeppelin.introspection.ERC165 import ERC165
 from openzeppelin.security.pausable import Pausable
 from openzeppelin.access.ownable import Ownable
 
+from src.codefordao.libraries.structs import ContractAddressType
+
 #
 # Structs
 #
-struct ContractType:
-    member governor: felt
-    member treasury: felt
-    member share_token: felt
-    member share_governor: felt
-end
 
 #
 # Storage
@@ -61,7 +57,7 @@ func investor(token_id: Uint256) -> (res: felt):
 end
 
 @storage_var
-func contracts_addresses(contract_type: ContractType) -> (addr: felt):
+func contracts_addresses(contract_type: ContractAddressType) -> (addr: felt):
 end
 
 #
@@ -264,10 +260,10 @@ func setupGovernor{
         share_governor_addr: felt
     ):
     Ownable.assert_only_owner()
-    contracts_addresses.write(ContractType.treasury, treasury_addr)
-    contracts_addresses.write(ContractType.governor, governor_addr)
-    contracts_addresses.write(ContractType.share_token, share_token_addr)
-    contracts_addresses.write(ContractType.share_governor, share_governor_addr)
+    contracts_addresses.write(ContractAddressType.treasury, treasury_addr)
+    contracts_addresses.write(ContractAddressType.governor, governor_addr)
+    contracts_addresses.write(ContractAddressType.share_token, share_token_addr)
+    contracts_addresses.write(ContractAddressType.share_governor, share_governor_addr)
     return ()
 end
 
