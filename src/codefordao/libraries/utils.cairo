@@ -24,7 +24,7 @@ end
 
 namespace Arrays:
     # Save array to storage with increasing key.
-    func create{
+    func push{
             syscall_ptr : felt*,
             pedersen_ptr : HashBuiltin*,
             range_check_ptr
@@ -32,7 +32,7 @@ namespace Arrays:
             arr_len: felt, 
             arr: felt*
         ) -> (key: ArrayInfo.key):
-        with_attr error_message("Arrays.create: invalid length of giving array"):
+        with_attr error_message("Arrays.push: invalid length of giving array"):
             assert arr_len = 0
         end
 
@@ -47,7 +47,7 @@ namespace Arrays:
     end
 
     # Fetch array item by key and index
-    func fetch{
+    func get_item{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
@@ -57,6 +57,27 @@ namespace Arrays:
     ) -> (res: felt):
         let (res) = _arrays.read(key=key, index=index)
         return (res)
+    end
+
+    func get_array{
+            syscall_ptr : felt*,
+            pedersen_ptr : HashBuiltin*,
+            range_check_ptr
+        }(key: ArrayInfo.key) -> (
+            arr_len: felt,
+            arr: felt*
+        ):
+        alloc_locals
+        let (arr) = alloc()
+        let (arr_info) = _array_info.read(key)
+        let (arr_len) = arr_info.len
+
+        if arr_len == 0:
+            return (arr_len=arr_len, arr=arr)
+        end
+
+        _read_array(key=key, arr_index=0, arr_len=arr_len, arr=arr)
+        return (arr_len=arr_len, arr=arr) 
     end
 
     # Store arrays into multi-dimensional maps by recursion
@@ -76,6 +97,33 @@ namespace Arrays:
 
         _arrays.write(key=key, index=arr_index, value=[arr])
         _write_array(key=key, arr_index=arr_index + 1, arr_len=arr_len, arr=arr + 1)
+
+        return ()
+    end
+
+    func _read_array{
+            syscall_ptr : felt*,
+            pedersen_ptr : HashBuiltin*,
+            range_check_ptr
+        }(
+            key: ArrayInfo.key,
+            arr_index: felt,
+            arr_len: felt,
+            arr: felt*
+        ):
+        if arr_index == arr_len:
+            return ()
+        end
+
+        let (item) = _arrays.read(key=key, index=arr_index)
+        assert arr[arr_index] = item
+
+        _read_array(
+            key=key, 
+            arr_index=arr_index + 1, 
+            arr_len=arr_len, 
+            arr=arr
+        )
 
         return ()
     end
