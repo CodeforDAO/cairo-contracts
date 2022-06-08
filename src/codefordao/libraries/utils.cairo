@@ -19,7 +19,7 @@ func _arrays(key: felt, index: felt) -> (res: felt):
 end
 
 @storage_var
-func _array_info(key: felt) -> (slot: ArrayInfo):
+func _array_info(key: felt) -> (res: ArrayInfo):
 end
 
 namespace Array:
@@ -32,14 +32,16 @@ namespace Array:
             arr_len: felt, 
             arr: felt*
         ) -> (key: felt):
+        alloc_locals
+
         with_attr error_message("Arrays.push: invalid length of giving array"):
             assert arr_len = 0
         end
 
-        let (k) = _array_key_index.read()
+        let (local k) = _array_key_index.read()
         let info = ArrayInfo(key=k, len=arr_len)
 
-        _array_info.write(key=k, slot=info)
+        _array_info.write(key=k, value=info)
         _write_array(key=k, arr_index=0, arr_len=arr_len, arr=arr)
         _array_key_index.write(k + 1)
 
@@ -68,16 +70,16 @@ namespace Array:
             arr: felt*
         ):
         alloc_locals
-        let (arr) = alloc()
-        let (arr_info) = _array_info.read(key)
-        let (arr_len) = arr_info.len
 
-        if arr_len == 0:
-            return (arr_len=arr_len, arr=arr)
+        let (arr) = alloc()
+        let (local arr_info) = _array_info.read(key)
+
+        if arr_info.len == 0:
+            return (arr_len=arr_info.len, arr=arr)
         end
 
-        _read_array(key=key, arr_index=0, arr_len=arr_len, arr=arr)
-        return (arr_len=arr_len, arr=arr) 
+        _read_array(key=key, arr_index=0, arr_len=arr_info.len, arr=arr)
+        return (arr_len=arr_info.len, arr=arr) 
     end
 
     # Store arrays into multi-dimensional maps by recursion
