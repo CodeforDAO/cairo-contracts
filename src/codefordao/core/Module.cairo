@@ -8,6 +8,7 @@ from starkware.cairo.common.math import assert_le, assert_lt
 from starkware.starknet.common.syscalls import call_contract, get_caller_address
 
 from src.codefordao.libraries.structs import ContractAddressType
+from src.codefordao.libraries.utils import Arrays
 
 #
 # Events
@@ -79,6 +80,10 @@ func _description() -> (uri: felt):
 end
 
 @storage_var
+func _operators_key() -> (res: felt):
+end
+
+@storage_var
 func _addresses(addr_type: ContractAddressType) -> (addr: felt):
 end
 
@@ -87,7 +92,7 @@ namespace CodeforDAO_Module:
     #
     # Initializer
     #
-    func module_initializer{
+    func initializer{
             syscall_ptr: felt*,
             pedersen_ptr: HashBuiltin*,
             range_check_ptr
@@ -102,17 +107,29 @@ namespace CodeforDAO_Module:
         _name.write(name)
         _description.write(description)
         _addresses.write(addr_type=ContractAddressType.membership, addr=membership_addr)
+
+        let (_key) = Arrays.push(arr_len=operators_len, arr=operators)
+        _operators_key.write(_key)
+
         return ()
     end
 
     #
     # Public functions
     #
-    func listOperators{
+    func operators{
             pedersen_ptr: HashBuiltin*,
             syscall_ptr: felt*,
             range_check_ptr
-        }() -> (_operators: [Uint256]):
+        }() -> (
+            operators_len: felt,
+            operators: felt*
+        ):
+
+        let (key) = _operators_key.read()
+        let (arr_len, arr) = Arrays.get_array(key)
+
+        return (operators_len=arr_len, operators=arr)
     end
 
     func getMembershipTokenId{
