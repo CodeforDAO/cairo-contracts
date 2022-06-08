@@ -2,7 +2,10 @@
 
 %lang starknet
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin
-
-namespace BaseStructs:
+struct ContractAddressType:
+    member membership: felt
+    member governor: felt
+    member treasury: felt
+    member share_token: felt
+    member share_governor: felt
 end
