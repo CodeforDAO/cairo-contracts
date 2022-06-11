@@ -3,7 +3,9 @@
 %lang starknet
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.uint256 import Uint256
+from starkware.starknet.common.syscalls import get_caller_address
 
 from openzeppelin.token.erc721.library import (
     ERC721_name,
@@ -40,6 +42,7 @@ from openzeppelin.security.pausable import Pausable
 from openzeppelin.access.ownable import Ownable
 
 from src.codefordao.libraries.structs import ContractAddressType
+from src.codefordao.libraries.merkle import merkle_verify
 
 #
 # Structs
@@ -58,6 +61,10 @@ end
 
 @storage_var
 func contracts_addresses(contract_type: ContractAddressType) -> (addr: felt):
+end
+
+@storage_var
+func merkle_root() -> (root: felt):
 end
 
 #
@@ -249,6 +256,17 @@ func setContractURI{
 end
 
 @external
+func setMerkleRoot{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(root: felt):
+    Ownable.assert_only_owner()
+    merkle_root.write(root)
+    return ()
+end
+
+@external
 func setupGovernor{
         syscall_ptr: felt*,
         pedersen_ptr: HashBuiltin*,
@@ -350,10 +368,26 @@ func mint{
         pedersen_ptr: HashBuiltin*,
         syscall_ptr: felt*,
         range_check_ptr
-    }(to: felt, tokenId: Uint256):
+    }(
+        proof_len: felt,
+        proof: felt*
+        token_id: Uint256
+    ):
+    alloc_locals
+
     Pausable.assert_not_paused()
-    Ownable.assert_only_owner()
-    ERC721_Enumerable_mint(to, tokenId)
+
+    let (sender) = get_caller_address()
+    let local amount = Uint256(0, 1)
+    let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount.low, amount.high)
+    let (leaf) = hash2{hash_ptr=pedersen_ptr}(sender, amount_hash)
+
+    let (local root) = merkle_root.read()
+    let (proof_valid) = merkle_verify(leaf, root, proof_len, proof)
+
+    assert proof_valid = 1
+
+    ERC721_Enumerable_mint(sender, tokenId)
     return ()
 end
 
