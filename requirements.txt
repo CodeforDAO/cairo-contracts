@@ -3,4 +3,5 @@ cairo-lang
 cairo-nile
 pytest-cairo
 tox
+immutablex-starknet
 git+https://github.com/OpenZeppelin/cairo-contracts.git
