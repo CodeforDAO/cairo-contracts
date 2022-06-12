@@ -45,8 +45,11 @@ from src.codefordao.libraries.structs import ContractAddressType
 from src.codefordao.libraries.merkle import merkle_verify
 
 #
-# Structs
+# Constants
 #
+
+const MINTER_ROLE = 'MINTER_ROLE'
+const INVITER_ROLE = 'INVITER_ROLE'
 
 #
 # Storage
@@ -231,13 +234,19 @@ func paused{
 end
 
 @view
-func owner{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }() -> (owner: felt):
-    let (owner: felt) = Ownable.owner()
-    return (owner)
+func hasRole{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    role : felt, account : felt
+) -> (res : felt):
+    let (res) = AccessControl.has_role(role, account)
+    return (res)
+end
+
+@view
+func getRoleAdmin{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    role : felt
+) -> (role_admin : felt):
+    let (role_admin) = AccessControl.get_role_admin(role)
+    return (role_admin)
 end
 
 #
@@ -261,7 +270,7 @@ func setMerkleRoot{
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     }(root: felt):
-    AccessControl.only_role(DEFAULT_ADMIN_ROLE)
+    AccessControl.only_role(INVITER_ROLE)
     merkle_root.write(root)
     return ()
 end
@@ -399,5 +408,27 @@ func setTokenURI{
     }(tokenId: Uint256, tokenURI: felt):
     AccessControl.only_role(DEFAULT_ADMIN_ROLE)
     ERC721_setTokenURI(tokenId, tokenURI)
+    return ()
+end
+
+#
+# Access control related functions
+#
+
+@external
+func grantRole{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    role : felt, 
+    account : felt
+):
+    AccessControl.grant_role(role, account)
+    return ()
+end
+
+@external
+func revokeRole{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    role : felt, 
+    account : felt
+):
+    AccessControl.revoke_role(role, account)
     return ()
 end
