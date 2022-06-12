@@ -39,7 +39,7 @@ from openzeppelin.token.erc721_enumerable.library import (
 
 from openzeppelin.introspection.ERC165 import ERC165
 from openzeppelin.security.pausable import Pausable
-from openzeppelin.access.ownable import Ownable
+from immutablex.starknet.access.AccessControl import AccessControl, DEFAULT_ADMIN_ROLE
 
 from src.codefordao.libraries.structs import ContractAddressType
 from src.codefordao.libraries.merkle import merkle_verify
@@ -78,11 +78,11 @@ func constructor{
     }(
         name: felt,
         symbol: felt,
-        owner: felt
+        default_admin: felt
     ):
     ERC721_initializer(name, symbol)
     ERC721_Enumerable_initializer()
-    Ownable.initializer(owner)
+    AccessControl.initializer(default_admin)
     return ()
 end
 
@@ -250,7 +250,7 @@ func setContractURI{
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     }(uri: felt):
-    Ownable.assert_only_owner()
+    AccessControl.only_role(DEFAULT_ADMIN_ROLE)
     contract_uri.write(uri)
     return ()
 end
@@ -261,7 +261,7 @@ func setMerkleRoot{
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     }(root: felt):
-    Ownable.assert_only_owner()
+    AccessControl.only_role(DEFAULT_ADMIN_ROLE)
     merkle_root.write(root)
     return ()
 end
@@ -277,7 +277,7 @@ func setupGovernor{
         share_token_addr: felt,
         share_governor_addr: felt
     ):
-    Ownable.assert_only_owner()
+    AccessControl.only_role(DEFAULT_ADMIN_ROLE)
     contracts_addresses.write(ContractAddressType.treasury, treasury_addr)
     contracts_addresses.write(ContractAddressType.governor, governor_addr)
     contracts_addresses.write(ContractAddressType.share_token, share_token_addr)
@@ -335,7 +335,7 @@ func pause{
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     }():
-    Ownable.assert_only_owner()
+    AccessControl.only_role(DEFAULT_ADMIN_ROLE)
     Pausable._pause()
     return ()
 end
@@ -346,7 +346,7 @@ func unpause{
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     }():
-    Ownable.assert_only_owner()
+    AccessControl.only_role(DEFAULT_ADMIN_ROLE)
     Pausable._unpause()
     return ()
 end
@@ -397,27 +397,7 @@ func setTokenURI{
         syscall_ptr: felt*,
         range_check_ptr
     }(tokenId: Uint256, tokenURI: felt):
-    Ownable.assert_only_owner()
+    AccessControl.only_role(DEFAULT_ADMIN_ROLE)
     ERC721_setTokenURI(tokenId, tokenURI)
-    return ()
-end
-
-@external
-func transferOwnership{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }(newOwner: felt):
-    Ownable.transfer_ownership(newOwner)
-    return ()
-end
-
-@external
-func renounceOwnership{
-        syscall_ptr: felt*,
-        pedersen_ptr: HashBuiltin*,
-        range_check_ptr
-    }():
-    Ownable.renounce_ownership()
     return ()
 end
