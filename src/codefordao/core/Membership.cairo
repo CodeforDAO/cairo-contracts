@@ -392,7 +392,7 @@ func mint{
     let (leaf) = hash2{hash_ptr=pedersen_ptr}(sender, amount_hash)
 
     let (local root) = merkle_root.read()
-    let (proof_valid) = merkle_verify(leaf, root, proof_len, proof)
+    let (local proof_valid) = merkle_verify(leaf, root, proof_len, proof)
 
     assert proof_valid = 1
 
